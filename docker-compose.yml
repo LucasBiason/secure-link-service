@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  secure-link-service:
+    build: .
+    ports:
+      - "8011:8011"
+    environment:
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - REDIS_DB=0
+      - LINK_EXPIRATION_HOURS=1
+      - LINK_FINAL_EXPIRATION_HOURS=2
+      - PORT=8011
+      - DEBUG=True
+    depends_on:
+      - redis
+    volumes:
+      - ./app:/app/app
+
+volumes:
+  redis_data:
